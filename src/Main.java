@@ -52,8 +52,9 @@ public class Main {
                 totalLoadedBytes / (1024.0 * 1024));
     }
 
+    private static final byte[] buffer = new byte[BUFFER_SIZE];
+
     private static void loadFile(Path path) {
-        byte[] buffer = new byte[BUFFER_SIZE];
         try (InputStream is = Files.newInputStream(path)) {
             int n;
             while ((n = is.read(buffer)) != -1) {
