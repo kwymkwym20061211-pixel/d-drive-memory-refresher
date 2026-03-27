@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -13,37 +14,64 @@ import java.util.stream.Stream;
 
 /**
  * Dドライブの全ファイルを再帰的にロードし、メモリの揮発を防止するためのクラス。
- * 読み込んだデータは保持せず、即座に破棄される。
  */
 public class Main {
 
-    // スレッド数はCPUコア数やディスクI/O特性に合わせる（4~8程度が現実的）
     private static final int THREAD_COUNT = 4;
-    // 1回の読み込みバッファサイズ（1MB）
-    private static final int BUFFER_SIZE = 1024 * 1024;
-    // 進捗管理用（スレッドセーフな加算器）
+    private static final int BUFFER_SIZE = 8 * 1024 * 1024;
     private static final LongAdder totalLoadedBytes = new LongAdder();
+    // 全体サイズを保持する変数
+    private static long totalTargetBytes = 0;
 
     public static void main(String[] args) {
         Path rootPath = Paths.get("D:\\");
-        ExecutorService executor = Executors.newFixedThreadPool(THREAD_COUNT);
 
-        System.out.println("Scanning and loading files from: " + rootPath);
+        System.out.println("Step 1: Calculating total size...");
+
+        // 1. 最初に全体のサイズを求める
+        try (Stream<Path> paths = Files.walk(rootPath)) {
+            totalTargetBytes = paths.filter(Files::isRegularFile)
+                    .mapToLong(p -> {
+                        try {
+                            return Files.size(p);
+                        } catch (IOException e) {
+                            return 0L;
+                        }
+                    }).sum();
+        } catch (IOException e) {
+            System.err.println("Failed to scan directory: " + e.getMessage());
+            return;
+        }
+
+        double totalGB = totalTargetBytes / (1024.0 * 1024 * 1024);
+        System.out.printf("Total target size: %.2f GB%n", totalGB);
+
+        // 2. 実行しますか？(y/n)
+        System.out.print("Do you want to start loading? (y/n): ");
+        @SuppressWarnings("resource")
+        Scanner scanner = new Scanner(System.in);
+        String input = scanner.nextLine();
+
+        if (!input.equalsIgnoreCase("y")) {
+            System.out.println("Aborted.");
+            return;
+        }
+
+        // 3. 実行開始
+        ExecutorService executor = Executors.newFixedThreadPool(THREAD_COUNT);
+        System.out.println("Starting execution...");
 
         try (Stream<Path> paths = Files.walk(rootPath)) {
             paths.filter(Files::isRegularFile).forEach(path -> {
                 executor.submit(() -> loadFile(path));
             });
         } catch (IOException e) {
-            System.err.println("Failed to access path: " + e.getMessage());
+            System.err.println("Error during submission: " + e.getMessage());
         }
 
-        // 全タスクの終了を待機
         executor.shutdown();
         try {
-            if (!executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS)) {
-                executor.shutdownNow();
-            }
+            executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
         } catch (InterruptedException e) {
             executor.shutdownNow();
             Thread.currentThread().interrupt();
@@ -53,30 +81,25 @@ public class Main {
         System.out.println("\nAll memory loading completed. Total loaded: " + totalMB + " MB");
     }
 
-    /**
-     * 指定されたファイルをバッファサイズごとに読み込む
-     */
     private static void loadFile(Path path) {
-        // 巨大ファイルでもOOMにならないよう、固定長バッファで読み込む
         byte[] buffer = new byte[BUFFER_SIZE];
-        long fileLoadedBytes = 0;
 
         try (InputStream is = Files.newInputStream(path)) {
             int n;
             while ((n = is.read(buffer)) != -1) {
-                // 読み込むこと自体が目的なので、中身には触れない
-                // 読み込んだバイト数を加算
                 totalLoadedBytes.add(n);
-                fileLoadedBytes += n;
+                // 進捗計算は全体に対する割合で出すため、ここでは加算のみ
             }
 
-            // 進捗表示（コンソールが埋まらないよう、ファイル単位程度で出すのが現実的）
-            System.out.printf("Loaded: %s (%d MB)%n",
-                    path.getFileName(), fileLoadedBytes / (1024 * 1024));
+            // 進捗%（小数点第一位）を計算
+            double progress = (totalTargetBytes > 0)
+                    ? (totalLoadedBytes.doubleValue() / totalTargetBytes * 100)
+                    : 100.0;
+
+            System.out.printf("[%5.1f%%] Loaded: %s%n", progress, path.getFileName());
 
         } catch (IOException e) {
-            // システムファイルなどアクセス権限がないものはスキップ
-            System.err.println("Skip (Access Denied/Error): " + path + " - " + e.getMessage());
+            System.err.println("Skip (Error): " + path + " - " + e.getMessage());
         }
     }
 }
