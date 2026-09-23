@@ -20,8 +20,13 @@ cd /d "%~dp0"
 :: ビルドしてバイナリを最新版にする。
 call .\build.bat
 
+:: 処理にかかった時間計測のための変数
+set startTimeRunHeavy=%time%
+
 :: その後、ハッシュ照合、ABリフレッシュ、リハッシュをこの順で行う。
 call .\run.bat --check-hash --refresh --rehash
+
+set endTimeRunHeavy=%time%
 
 :: 異常がなければそのまま終了。異常があればエラーコードを返してpause。
 if %errorlevel% NEQ 0 (
@@ -29,3 +34,8 @@ if %errorlevel% NEQ 0 (
     pause
     exit /b %errorlevel%
 )
+
+:: 処理の開始時間と終了時間を表示
+echo [INFO] Heavy Refresh completed successfully.
+echo [INFO] Start Time: %startTimeRunHeavy%
+echo [INFO] End Time: %endTimeRunHeavy%
