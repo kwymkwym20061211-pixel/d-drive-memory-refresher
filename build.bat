@@ -31,4 +31,3 @@ if %ERRORLEVEL% EQU 0 (
 )
 
 if exist "%TEMP_LIST%" del "%TEMP_LIST%"
-pause
