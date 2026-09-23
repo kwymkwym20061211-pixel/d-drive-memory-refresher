@@ -21,16 +21,32 @@ public class Main {
         // タスクに応じて処理を実行:順は大事
         try {
             if (tasks.willCheckHash) {
+                System.out.println("------------------------------------------------------------------------------");
+                System.out.println("[INFO] Starting hash verification...");
                 DirectoryHasher.verifyHash(targetRoot);
+                System.out.println("[INFO] Hash verification completed.");
+                System.out.println("------------------------------------------------------------------------------");
             }
             if (tasks.willLoad) {
+                System.out.println("------------------------------------------------------------------------------");
+                System.out.println("[INFO] Starting memory loading...");
                 DirectoryLoader.load(targetRoot);
+                System.out.println("[INFO] Memory loading completed.");
+                System.out.println("------------------------------------------------------------------------------");
             }
             if (tasks.willRefresh) {
+                System.out.println("------------------------------------------------------------------------------");
+                System.out.println("[INFO] Starting directory refresh...");
                 DirectoryRefresher.refresh(targetRoot);
+                System.out.println("[INFO] Directory refresh completed.");
+                System.out.println("------------------------------------------------------------------------------");
             }
             if (tasks.willRehash) {
+                System.out.println("------------------------------------------------------------------------------");
+                System.out.println("[INFO] Starting hash re-calculation...");
                 DirectoryHasher.createHash(targetRoot);
+                System.out.println("[INFO] Hash re-calculation completed.");
+                System.out.println("------------------------------------------------------------------------------");
             }
         } catch (Exception e) {
             System.err.println("[ERROR] Exception occurred: " + e.getMessage());
