@@ -18,10 +18,10 @@ if /I "%userInput%" NEQ "Y" (
 cd /d "%~dp0"
 
 :: ビルドしてバイナリを最新版にする。
-.\build.bat
+call .\build.bat
 
 :: その後、ハッシュ照合、リハッシュをこの順で行う。ハッシュ照合するときにロードするのでローダーの実行は不要。
-.\run.bat --check-hash --rehash
+call .\run.bat --check-hash --rehash
 
 :: 異常がなければそのまま終了。異常があればエラーコードを返してpause。
 if %errorlevel% NEQ 0 (
