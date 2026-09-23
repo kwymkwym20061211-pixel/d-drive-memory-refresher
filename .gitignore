@@ -1,6 +1,7 @@
 # 生成されるもの
 generated/*
 **/.hash.toml
+sources_list.txt
 
 #localテストのための領域
 /local
