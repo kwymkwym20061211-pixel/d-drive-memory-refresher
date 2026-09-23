@@ -118,7 +118,7 @@ public final class DirectoryRefresher {
                     "最大ファイルサイズがドライブ空き容量の "+getSafeMaxFileSizeRatio()+" を超えています。\n"
                             + "  Largest file : " + largestFileSize + " bytes\n"
                             + "  Usable space : " + usableSpace + " bytes\n"
-                            + "  Half         : " + calculateSafeMaxFileSize(usableSpace) + " bytes");
+                            + "  Safety limit : " + calculateSafeMaxFileSize(usableSpace) + " bytes");
         }
 
         // ------------------------------------------------------------
@@ -198,7 +198,7 @@ public final class DirectoryRefresher {
     }
 
 
-    private final static float SAFE_MAX_FILE_SIZE_RATIO = 0.66f;
+    private final static float SAFE_MAX_FILE_SIZE_RATIO = 0.7f;
     /**
      * 安全な最大ファイルサイズの残り容量比率を取得
      */
