@@ -219,7 +219,7 @@ public final class DirectoryRefresher {
 
         if (children.size() != 2) {
             throw new IllegalStateException(
-                    "親ディレクトリ直下には A/ と B/ の2つだけが存在する必要があります。\n"
+                    "親ディレクトリ直下には A/ と B/ の2つのみが存在する必要があります。\n"
                             + "実際のエントリ数: " + children.size()
                             + "\n" + children);
         }

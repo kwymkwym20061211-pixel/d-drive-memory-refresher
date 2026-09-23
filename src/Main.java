@@ -37,7 +37,8 @@ public class Main {
             if (tasks.willRefresh) {
                 System.out.println("------------------------------------------------------------------------------");
                 System.out.println("[INFO] Starting directory refresh...");
-                DirectoryRefresher.refresh(targetRoot);
+                final Path dataRoot = targetRoot.resolve("data");
+                DirectoryRefresher.refresh(dataRoot);
                 System.out.println("[INFO] Directory refresh completed.");
                 System.out.println("------------------------------------------------------------------------------");
             }
