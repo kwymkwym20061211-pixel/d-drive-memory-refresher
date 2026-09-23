@@ -1,6 +1,9 @@
 @echo off
 chcp 65001 >nul
 
+:: 0. コードを最新化
+.\build.bat
+
 :: 1. スリープを一時的に無効化（AC電源時: 0は無効）
 powercfg /x -standby-timeout-ac 0
 
