@@ -23,8 +23,9 @@ cd /d "%~dp0"
 :: その後、ハッシュ照合、ABリフレッシュ、リハッシュをこの順で行う。
 .\run.bat --check-hash --refresh --rehash
 
-:: 異常がなければそのまま終了。異常があればエラーコードを返す。
+:: 異常がなければそのまま終了。異常があればエラーコードを返してpause。
 if %errorlevel% NEQ 0 (
-    echo [ERROR] An error occurred during the operations. Please check the logs for details.
+    echo [ERROR] An error occurred during the operations. Please check the logs for details. errorlevel=%errorlevel%
+    pause
     exit /b %errorlevel%
 )
