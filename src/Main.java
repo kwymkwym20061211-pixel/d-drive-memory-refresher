@@ -52,6 +52,7 @@ public class Main {
         } catch (Exception e) {
             System.err.println("[ERROR] Exception occurred: " + e.getMessage());
             e.printStackTrace();
+            throw new RuntimeException(e);
         }
     }
 
