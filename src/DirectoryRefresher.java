@@ -111,14 +111,14 @@ public final class DirectoryRefresher {
         System.out.println(
                 "Required max : " + formatBytes(largestFileSize));
         System.out.println(
-                "Safety limit : " + formatBytes(usableSpace / 2));
+                "Safety limit : " + formatBytes(calculateSafeMaxFileSize(usableSpace)));
 
-        if (largestFileSize > usableSpace / 2) {
+        if (largestFileSize > calculateSafeMaxFileSize(usableSpace)) {
             throw new IllegalStateException(
-                    "最大ファイルサイズがドライブ空き容量の 1/2 を超えています。\n"
+                    "最大ファイルサイズがドライブ空き容量の "+getSafeMaxFileSizeRatio()+" を超えています。\n"
                             + "  Largest file : " + largestFileSize + " bytes\n"
                             + "  Usable space : " + usableSpace + " bytes\n"
-                            + "  Half         : " + (usableSpace / 2) + " bytes");
+                            + "  Half         : " + calculateSafeMaxFileSize(usableSpace) + " bytes");
         }
 
         // ------------------------------------------------------------
@@ -195,6 +195,21 @@ public final class DirectoryRefresher {
         System.out.println("Source: " + source + " (completely empty)");
         System.out.println("Target: " + target + " (contains refreshed data)");
 
+    }
+
+
+    private final static float SAFE_MAX_FILE_SIZE_RATIO = 0.66f;
+    /**
+     * 安全な最大ファイルサイズの残り容量比率を取得
+     */
+    private static float getSafeMaxFileSizeRatio() {
+        return SAFE_MAX_FILE_SIZE_RATIO;
+    }
+    /**
+     * 残り容量から安全な最大ファイルサイズを導出
+     */
+    private static int calculateSafeMaxFileSize(long usableSpace) {
+        return (int) (usableSpace * getSafeMaxFileSizeRatio());
     }
 
     /**
