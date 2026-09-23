@@ -7,7 +7,7 @@ setlocal enabledelayedexpansion
 set "BASE_DIR=%~dp0"
 set "SRC_DIR=%BASE_DIR%src"
 set "OUT_DIR=%BASE_DIR%generated"
-set "TEMP_LIST=%BASE_DIR%sources_list.txt"
+set "TEMP_LIST=%BASE_DIR%generated\.sources_list.txt"
 
 echo [INFO] ビルドを開始します...
 
