@@ -372,34 +372,37 @@ public final class DirectoryRefresher {
                 formatBytes(sourceSize));
 
         /*
+         * target の親ディレクトリが存在することを保証する。
+         *
+         * target 自体はまだ存在しないので、
+         * Files.getFileStore(target) は呼び出してはいけない。
+         */
+        Path targetParent = target.getParent();
+
+        if (targetParent == null) {
+            throw new IOException(
+                    "コピー先ファイルの親ディレクトリを取得できません。\n"
+                            + "Target: " + target);
+        }
+
+        Files.createDirectories(targetParent);
+
+        /*
          * コピー直前にも空き容量を確認する。
          *
-         * 初期段階で「最大ファイル <= 空き容量 / 2」を確認しているが、
-         * 実際のコピー直前にも再確認することで、
-         * 外部プロセスによるディスク使用などにも多少強くなる。
+         * target はまだ存在しないため、
+         * FileStore は既に存在する targetParent から取得する。
          */
-        Path parent = target;
-
-        FileStore store = Files.getFileStore(parent);
+        FileStore store = Files.getFileStore(targetParent);
         long usable = store.getUsableSpace();
 
         if (sourceSize > usable) {
             throw new IOException(
                     "コピー先の空き容量が不足しています。\n"
-                            + "  Source : " + source + "\n"
-                            + "  Target : " + target + "\n"
+                            + "  Source      : " + source + "\n"
+                            + "  Target      : " + target + "\n"
                             + "  File size   : " + sourceSize + " bytes\n"
                             + "  Usable space: " + usable + " bytes");
-        }
-
-        /*
-         * target はディレクトリ構造作成時点で存在するはずだが、
-         * 念のため親ディレクトリを作る。
-         */
-        Path targetParent = target.getParent();
-
-        if (targetParent != null) {
-            Files.createDirectories(targetParent);
         }
 
         // ------------------------------------------------------------
