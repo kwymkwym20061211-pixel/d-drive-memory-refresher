@@ -105,20 +105,21 @@ public final class DirectoryRefresher {
         // ------------------------------------------------------------
 
         FileStore fileStore = Files.getFileStore(parent);
-        long usableSpace = fileStore.getUsableSpace();
+        final long usableSpace = fileStore.getUsableSpace();
+        final long safeMaxFileSize = calculateSafeMaxFileSize(usableSpace);
 
         System.out.println("Usable space : " + formatBytes(usableSpace));
         System.out.println(
-                "Required max : " + formatBytes(largestFileSize));
+                "Safety limit : " + formatBytes(safeMaxFileSize));
         System.out.println(
-                "Safety limit : " + formatBytes(calculateSafeMaxFileSize(usableSpace)));
+                "Required max : " + formatBytes(largestFileSize));
 
-        if (largestFileSize > calculateSafeMaxFileSize(usableSpace)) {
+        if (largestFileSize > safeMaxFileSize) {
             throw new IllegalStateException(
-                    "最大ファイルサイズがドライブ空き容量の "+getSafeMaxFileSizeRatio()+" を超えています。\n"
-                            + "  Largest file : " + largestFileSize + " bytes\n"
-                            + "  Usable space : " + usableSpace + " bytes\n"
-                            + "  Safety limit : " + calculateSafeMaxFileSize(usableSpace) + " bytes");
+                    "最大ファイルサイズがドライブ空き容量の "+getSafeMaxFileSizeRatio()+"x を超えています。\n"
+                            + "  Largest file : " + formatBytes(largestFileSize) + "\n"
+                            + "  Usable space : " + formatBytes(usableSpace) + "\n"
+                            + "  Safety limit : " + formatBytes(safeMaxFileSize));
         }
 
         // ------------------------------------------------------------
@@ -198,18 +199,21 @@ public final class DirectoryRefresher {
     }
 
 
-    private final static float SAFE_MAX_FILE_SIZE_RATIO = 0.7f;
+    private final static double SAFE_MAX_FILE_SIZE_RATIO = 0.666f;
     /**
      * 安全な最大ファイルサイズの残り容量比率を取得
      */
-    private static float getSafeMaxFileSizeRatio() {
+    private static double getSafeMaxFileSizeRatio() {
         return SAFE_MAX_FILE_SIZE_RATIO;
     }
     /**
      * 残り容量から安全な最大ファイルサイズを導出
+     * 一度KB単位にしてから返すことでキャストによる値あふれを抑制
      */
-    private static int calculateSafeMaxFileSize(long usableSpace) {
-        return (int) (usableSpace * getSafeMaxFileSizeRatio());
+    private static long calculateSafeMaxFileSize(long usableSpace) {
+        final long usableKb = usableSpace / 1024;
+        final long safeMaxKb = (long) (usableKb * getSafeMaxFileSizeRatio());
+        return safeMaxKb * 1024;
     }
 
     /**
