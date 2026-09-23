@@ -3,7 +3,7 @@ package src;
 import java.nio.file.Path;
 
 public class Main {
-    private class Tasks {
+    private static class Tasks {
         public boolean willLoad;
         public boolean willRehash;
         public boolean willCheckHash;
@@ -61,7 +61,7 @@ public class Main {
      * --rehash : ハッシュ再計算
      */
     private static Tasks getTasksFromArgs(String[] args) {
-        Main.Tasks tasks = new Main.Tasks();
+        Tasks tasks = new Tasks();
         for (int i = 0; i < args.length; i++) {
             switch (args[i]) {
                 case "--load":
