@@ -59,7 +59,7 @@ public class Main {
      */
     private static String getTargetDirectoryFromArgs(String[] args, final String defaultDir) {
         for (int i = 0; i < args.length; i++) {
-            if (args[i].equals("-target") && i + 1 < args.length) {
+            if (args[i].equals("--target") && i + 1 < args.length) {
                 final String targetDir = args[i + 1];
                 System.out.println("[INFO] Refresh Target directory: " + targetDir);
                 return targetDir;

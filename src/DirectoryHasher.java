@@ -24,8 +24,7 @@ public final class DirectoryHasher {
 
     private static final String HEADER = "# SHA-256 hashes for verifying the integrity of files in this directory tree.";
 
-    private DirectoryHasher() {
-    }
+    private DirectoryHasher() {}
 
     /**
      * 指定ディレクトリ以下のファイルについてハッシュ情報を生成し、
